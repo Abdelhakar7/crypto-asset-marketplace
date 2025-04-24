@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException ,status
 from pymongo.errors import DuplicateKeyError
-from app.schemas.user_schema import UserCreate, UserOut
+from app.schemas.user_schema import UserCreate, UserOut, UserUpdate
 from app.services.user_service import UserService
 from app.api.api_v1.auth.jwt import get_current_active_user
 from app.models.user_model import User
+from uuid import UUID
 
 user_router = APIRouter()
 
@@ -41,3 +42,10 @@ async def get_user_me(current_user: User = Depends(get_current_active_user)):
     Requires authentication.
     """
     return current_user
+
+
+@user_router.put("/update", response_model=UserOut, summary="Update user profile")
+async def update_user(data: UserUpdate, current_user: User = Depends(get_current_active_user)):
+ 
+    user = await UserService.update_user(current_user.user_id ,data)
+    return user

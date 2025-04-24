@@ -19,23 +19,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     """
     Dependency to get current authenticated user from JWT token.
     """
-    print(f"DEBUG: Token received: {token[:10]}...")
     
     try:
-        print("DEBUG: Attempting to decode token...")
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        print(f"DEBUG: Token decoded successfully: {payload}")
 
         try:
             token_data = TokenPayload(**payload)
-            print(f"DEBUG: TokenPayload created: {token_data}")
             
             now = datetime.now()
             exp_time = datetime.fromtimestamp(token_data.exp)
-            print(f"DEBUG: Current time: {now}, Token expires: {exp_time}")
             
             if exp_time < now:
-                print("DEBUG: Token has expired")
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Token expired",

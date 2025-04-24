@@ -55,8 +55,18 @@ async def refresh_token(refresh_token: str) -> Any:
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid refresh token"
+        detail="jwt error invalid token"
     )
+    credentials_exception2 = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="expired refresh token"
+    )
+    credentials_exception3 = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="credentials exception"
+    )
+    
+    
     
     try:
         # Decode the refresh token
@@ -72,15 +82,17 @@ async def refresh_token(refresh_token: str) -> Any:
         
         # Check if token is expired
         if datetime.now().timestamp() > exp:
-            raise credentials_exception
+            print("Token expired")
+            raise credentials_exception2
             
     except JWTError:
+        print("JWT Error")
         raise credentials_exception
     
     # Find user by ID
     user = await User.find_one(User.user_id == UUID(user_id))
     if user is None or user.disabled:
-        raise credentials_exception
+        raise credentials_exception3
     
     # Create new tokens
     access_token_expires = datetime.now() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)

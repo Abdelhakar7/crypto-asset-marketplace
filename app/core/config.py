@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     USER_ROLE: str = "user"
     ADMIN_ROLE: str = "admin"
 
+    CLOUDINARY_CLOUD_NAME : str = config("CLOUDINARY_CLOUD_NAME" , cast =str)
+    CLOUDINARY_API_KEY : int =config("CLOUDINARY_API_KEY" , cast =str)
+    CLOUDINARY_API_SECRET :str = config("CLOUDINARY_API_SECRET" , cast =str)
+
     class Config:
         case_sensitive = True
 
