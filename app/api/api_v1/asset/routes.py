@@ -15,7 +15,6 @@ async def create_asset(
     file: UploadFile = File(...),
     title: str = Form(...),
     description: Optional[str] = Form(None),
-    asset_type: str = Form(...),
     price: float = Form(...),
     category: str = Form(...),  # Expect JSON array of category names
     metadata: Optional[str] = Form(None),
@@ -44,7 +43,6 @@ async def create_asset(
     asset_data = AssetCreate(
         title=title,
         description=description,
-        asset_type=asset_type,
         price=Decimal(str(price)),
         categories=categories_enum,
         metadata=metadata_dict

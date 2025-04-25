@@ -1,8 +1,9 @@
 from fastapi import UploadFile, HTTPException
 from app.models.asset_model import Asset
 from app.models.category_model import Category
+from app.models.asset_type import AssetType
 from app.schemas.asset_schema import AssetCreate ,AssetResponse
-from app.utils.helpers import stream_upload
+from app.utils.helpers import stream_upload 
 from beanie import Link
 from uuid import UUID
 from app.models.user_model import User
@@ -17,7 +18,11 @@ class AssetService:
     ) -> AssetResponse:
         try:
             # Upload file to cloudinary
-            file_url, content_hash = await stream_upload(file)
+            file_url, content_hash , asset_type = await stream_upload(file)
+
+            asset_type_doc = await AssetType.find_one(AssetType.name == asset_type)
+
+
 
             # Get category documents
             categories = []
@@ -50,7 +55,7 @@ class AssetService:
             new_asset = Asset(
                 title=asset_data.title,
                 description=asset_data.description,
-                asset_type=asset_data.asset_type,
+                asset_type=asset_type_doc.asset_type_id,
                 price=asset_data.price,
                 file_url=file_url,
                 content_hash=content_hash,

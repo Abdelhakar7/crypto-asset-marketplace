@@ -10,7 +10,6 @@ class AssetBase(BaseModel):
     """Schema for creating an asset"""
     title: str
     description: Optional[str] = None
-    asset_type: str
     price: Decimal
     categories: List[CategoryEnum]
     metadata: Optional[Dict[str, Any]] = {}

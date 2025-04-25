@@ -15,6 +15,12 @@ from app.models.asset_type import AssetType
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+PREDEFINED_ASSET_TYPES = [
+    {"asset_type_id": 1, "name": "image"},
+    {"asset_type_id": 2, "name": "video"},
+    {"asset_type_id": 3, "name": "pdf"},
+]
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Configure Google Public DNS
@@ -47,28 +53,29 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Error creating category {category_data}: {str(e)}")
             
-        # Initialize predefined asset types
-    for type_data in AssetType.PREDEFINED_TYPES:
+
+         # Seed asset types once
+    for type_data in PREDEFINED_ASSET_TYPES:
         logger.info(f"Processing asset type: {type_data}")
         try:
-            # Explicitly ensure ID is set
-            if 'asset_type_id' not in type_data or type_data['asset_type_id'] is None:
+            if "asset_type_id" not in type_data or type_data["asset_type_id"] is None:
                 logger.error(f"Invalid asset type data, missing ID: {type_data}")
                 continue
-            
+
             existing = await AssetType.find_one({"asset_type_id": type_data["asset_type_id"]})
             if not existing:
-                # Create with explicit ID to ensure it's set
                 asset_type = AssetType(
                     asset_type_id=type_data["asset_type_id"],
-                    name=type_data["name"],
-                    mime_types=type_data["mime_types"]
+                    name=type_data["name"]
                 )
-                logger.info(f"Asset type object before insert: {asset_type.dict()}")
+                logger.info(f"AssetType object before insert: {asset_type.dict()}")
                 await asset_type.insert()
                 logger.info(f"Created asset type: {type_data['name']}")
         except Exception as e:
-            logger.error(f"Error creating asset type {type_data}: {str(e)}")
+            logger.error(f"Error creating asset type {type_data}: {e}")
+
+    logger.info("✅ Beanie initialized and AssetTypes seeded.")
+            
 
     logger.info("✅ Beanie initialized and connected to MongoDB.")
     yield  # App runs after this

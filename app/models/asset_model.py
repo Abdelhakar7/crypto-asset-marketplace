@@ -13,7 +13,7 @@ class Asset(Document):
     asset_id: UUID = Field(default_factory=uuid4)
     title: str
     description: Optional[str] = None
-    asset_type: str
+    asset_type: int = Field(..., unique=True)
     file_url: str
     price: float
     owner_id: Link[User]
@@ -31,7 +31,6 @@ class Asset(Document):
             IndexModel([("asset_id", 1)], unique=True),
             IndexModel([("content_hash", 1)], unique=True),
             IndexModel([("owner_id", 1)]),
-            IndexModel([("asset_type", 1)]),
             IndexModel([("category", 1)])
         ]
 
