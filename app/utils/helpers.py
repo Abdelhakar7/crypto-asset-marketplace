@@ -1,13 +1,14 @@
-from tempfile import TemporaryFile
 import cloudinary
 import cloudinary.uploader
-from fastapi import UploadFile
-import hashlib
+from fastapi import UploadFile ,HTTPException
 from typing import Tuple
 from app.core.config import settings
-import os
-from tempfile import NamedTemporaryFile
-from pathlib import Path
+from app.core.security import asset_hash
+import asyncio
+from io import BytesIO
+from imagehash import hex_to_hash
+from fastapi import HTTPException
+from app.models.asset_model import Asset
 
 cloudinary.config(
     cloud_name=settings.CLOUDINARY_CLOUD_NAME,
@@ -28,59 +29,84 @@ def get_file_extension(file_name: str) -> str:
     return ext.lower()
 
 
-async def verify_type(file_extention : str) -> str:
-
-    video_extensions = ['mp4', 'mov', 'avi',]
+def verify_type(file_extension: str) -> str:
+    """Verify and return file type based on extension"""
+    video_extensions = ['mp4', 'mov', 'avi']
     image_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp']
-    pf_extensions = ['pdf']
+    pdf_extensions = ['pdf']
 
-    if file_extention in video_extensions:
+    extension = file_extension.lower()
+    
+    if extension in video_extensions:
         return 'video'
-    if file_extention in image_extensions:
+    if extension in image_extensions:
         return 'image'
-    if file_extention in pf_extensions: 
+    if extension in pdf_extensions:
         return 'pdf'
-    return "error type not supported "    
-
-async def stream_upload(file: UploadFile) -> Tuple[str, str ,str]:
-    """
-    Stream file upload to Cloudinary with memory-efficient approach
-    Returns: (file_url, content_hash)
-    """
-    hasher = hashlib.sha256()
     
-    # Use a smaller chunk size for faster processing
-    chunk_size = 256 * 1024  # 256KB chunks
-    
-    # Use NamedTemporaryFile to get a file path Cloudinary can use directly
-    with NamedTemporaryFile(delete=False) as temp_file:
-        try:
-            # Read and hash file in smaller chunks
-            while chunk := await file.read(chunk_size):
-                hasher.update(chunk)
-                temp_file.write(chunk)
-            
-            # Close file to ensure all data is written
-            temp_file.close()
-            
-            # Get content hash before upload starts
-            content_hash = hasher.hexdigest()
-            
-            # Upload to cloudinary - use resource_type="auto" for better MIME type detection
-            result = cloudinary.uploader.upload(
-                temp_file.name,
-                resource_type="auto", 
-                use_filename=True
-            )
+    raise HTTPException(
+        status_code=400,
+        detail=f"File type not supported: {extension}"
+    )
 
-            file_extension = get_file_extension(file.filename)
-            asset_type = await verify_type(file_extension)
-            if asset_type == "error type not supported":
-                raise ValueError(f"Unsupported file type.{file_extension}")
+async def stream_upload(file: UploadFile) -> Tuple[str, str, str, str]:
+    """
+    Stream file upload to Cloudinary with duplicate detection
+    Returns: (file_url, content_hash, asset_type, public_id)
+    """
+    try:
+        # Read content and determine type
+
+        content = await file.read()
+        extension = get_file_extension(file.filename)
+        asset_type = verify_type(extension)  # Remove await since it's no longer async
+
+        # Generate content hash
+        content_hash = await asyncio.to_thread(asset_hash, content, asset_type)
+
+        # Check for duplicates based on asset type
+        if asset_type == "image":
+            new_hash = hex_to_hash(content_hash)
+            existing_assets = await Asset.find(
+                {"asset_type": 1}
+            ).to_list()
             
-            
-            return result['secure_url'], content_hash ,asset_type
-        finally:
-            # Clean up temp file
-            if os.path.exists(temp_file.name):
-                os.unlink(temp_file.name)
+            for existing in existing_assets:
+                old_hash = hex_to_hash(existing.content_hash)
+                if abs(new_hash - old_hash) < 5:
+                    raise HTTPException(
+                        status_code=409,
+                        detail="Similar image already exists"
+                    )
+        else:
+            # For non-image files, check exact hash match
+            existing = await Asset.find_one({"content_hash": content_hash})
+            if existing:
+                raise HTTPException(
+                    status_code=409,
+                    detail="Identical content already exists"
+                )
+
+        # Map asset_type to Cloudinary resource_type
+        resource_type = {
+            "image": "image",
+            "video": "video",
+            "pdf": "raw"
+        }.get(asset_type)
+
+        # Upload to Cloudinary
+        result = cloudinary.uploader.upload(
+            BytesIO(content),
+            resource_type=resource_type,
+            use_filename=True
+        )
+
+        return result["secure_url"], content_hash, asset_type
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Upload failed: {str(e)}"
+        )

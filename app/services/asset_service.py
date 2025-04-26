@@ -4,7 +4,6 @@ from app.models.category_model import Category
 from app.models.asset_type import AssetType
 from app.schemas.asset_schema import AssetCreate ,AssetResponse
 from app.utils.helpers import stream_upload 
-from beanie import Link
 from uuid import UUID
 from app.models.user_model import User
 from pymongo.errors import DuplicateKeyError
@@ -17,12 +16,16 @@ class AssetService:
         user_id: UUID
     ) -> AssetResponse:
         try:
-            # Upload file to cloudinary
-            file_url, content_hash , asset_type = await stream_upload(file)
+            # Upload file to cloudinary - exceptions already handled in helpers.py
+            file_url, content_hash, asset_type = await stream_upload(file)
 
+            # Get asset type document
             asset_type_doc = await AssetType.find_one(AssetType.name == asset_type)
-
-
+            if not asset_type_doc:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Asset type not found: {asset_type}"
+                )
 
             # Get category documents
             categories = []
@@ -43,14 +46,6 @@ class AssetService:
                     detail="User not found"
                 )
 
-            # Check if content hash already exists
-            existing_asset = await Asset.find_one({"content_hash": content_hash})
-            if existing_asset:
-                raise HTTPException(
-                    status_code=409,  # Conflict
-                    detail="This content has already been uploaded. Duplicate content is not allowed."
-                )
-
             # Create new asset
             new_asset = Asset(
                 title=asset_data.title,
@@ -67,32 +62,14 @@ class AssetService:
             await new_asset.insert()
             return AssetResponse.from_asset(new_asset)
             
-        except DuplicateKeyError as e:
-            error_message = str(e)
-            if "content_hash" in error_message:
-                raise HTTPException(
-                    status_code=409,  # Conflict
-                    detail="This content has already been uploaded. Duplicate content is not allowed."
-                )
-            elif "asset_id" in error_message:
-                raise HTTPException(
-                    status_code=409,
-                    detail="Asset ID conflict. Please try again."
-                )
-            else:
-                raise HTTPException(
-                    status_code=409,
-                    detail="Duplicate record detected."
-                )
-        except Exception as e:
+        except HTTPException:
             # Re-raise HTTP exceptions as is
-            if isinstance(e, HTTPException):
-                raise e
-            
-            # For other exceptions, provide a generic error
+            raise
+        except Exception as e:
+            # For unexpected errors only
             raise HTTPException(
                 status_code=500,
-                detail=f"An error occurred while creating the asset: {str(e)}"
+                detail=f"Unexpected error creating asset: {str(e)}"
             )
 
 
