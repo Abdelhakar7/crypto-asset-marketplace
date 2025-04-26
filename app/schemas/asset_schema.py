@@ -5,6 +5,8 @@ from decimal import Decimal
 from uuid import UUID
 from datetime import datetime
 from app.models.asset_model import Asset
+from fastapi import HTTPException
+from app.models.category_model import Category
 
 class AssetBase(BaseModel):
     """Schema for creating an asset"""
@@ -33,8 +35,23 @@ class AssetResponse(AssetBase):
         from_attributes = True
         
     @classmethod
-    def from_asset(cls, asset: Asset):
+    async def from_asset(cls, asset: Asset):
+        
+        #get category names from category ids
+        category_names = []
+        for category_id in asset.category_ids:
+            category = await Category.find_one({"category_id": category_id})
+            if category:
+                category_names.append(category.name)
+            else:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Category not found: {category_id}"
+                )
         """Convert Asset document to response schema"""
+        
+        
+
         # Add debugging to check asset fields
         print(f"Asset fields: {asset.dict()}")
         
@@ -44,7 +61,7 @@ class AssetResponse(AssetBase):
             description=asset.description,
             asset_type=asset.asset_type,  # Asset type is already a string
             price=asset.price,
-            categories=[cat.name.value for cat in asset.categories],  # Changed from categories to category
+            categories=category_names,  # Changed from categories to category
             file_url=asset.file_url,
             content_hash=asset.content_hash,  # Ensure this is correctly passed
             owner_id=asset.owner_id, 

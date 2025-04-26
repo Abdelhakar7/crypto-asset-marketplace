@@ -17,7 +17,7 @@ class Asset(Document):
     file_url: str
     price: float
     owner_id: UUID = Field(...)
-    categories: List[Link[Category]]  # Required category, no longer Optional
+    category_ids: List[int]  # Required category, no longer Optional
     content_hash: str
     metadata: Optional[Dict[str, Any]] = {}
     is_minted: bool = False
@@ -31,6 +31,6 @@ class Asset(Document):
             IndexModel([("asset_id", 1)], unique=True),
             IndexModel([("content_hash", 1)], unique=True),
             IndexModel([("owner_id", 1)]),
-            IndexModel([("category", 1)])
+            IndexModel([("category_ids", 1)])
         ]
 

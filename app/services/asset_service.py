@@ -36,6 +36,8 @@ class AssetService:
                         detail=f"Category not found: {category_name}"
                     )
                 categories.append(category)
+                #get category ids
+            category_ids = [category.category_id for category in categories]
 
             # Get user document
             user = await User.find_one({"user_id": user_id})
@@ -54,12 +56,12 @@ class AssetService:
                 file_url=file_url,
                 content_hash=content_hash,
                 owner_id=user.user_id,
-                categories=categories,
+                category_ids=category_ids,
                 metadata=asset_data.metadata
             )
 
             await new_asset.insert()
-            return AssetResponse.from_asset(new_asset)
+            return await AssetResponse.from_asset(new_asset)
             
         except HTTPException:
             # Re-raise HTTP exceptions as is
