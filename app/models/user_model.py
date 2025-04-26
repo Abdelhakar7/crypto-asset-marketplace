@@ -1,7 +1,7 @@
 from typing import Optional
 from datetime import datetime
 from uuid import UUID, uuid4
-from beanie import Document, Indexed
+from beanie import Document
 from pydantic import Field, EmailStr
 from pymongo import IndexModel
 

@@ -6,7 +6,6 @@ from app.schemas.asset_schema import AssetCreate ,AssetResponse
 from app.utils.helpers import stream_upload 
 from uuid import UUID
 from app.models.user_model import User
-from pymongo.errors import DuplicateKeyError
 
 class AssetService:
     async def create_asset(
@@ -54,7 +53,7 @@ class AssetService:
                 price=asset_data.price,
                 file_url=file_url,
                 content_hash=content_hash,
-                owner_id=user,
+                owner_id=user.user_id,
                 categories=categories,
                 metadata=asset_data.metadata
             )

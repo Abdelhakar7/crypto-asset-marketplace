@@ -22,7 +22,7 @@ class AssetResponse(AssetBase):
     asset_id: UUID
     file_url: str
     content_hash: str
-    owner_id: str  # Change from UUID to str
+    owner_id: UUID  # Change from UUID to str
     categories: List[str]  # Change from CategoryEnum to str
     is_minted: bool
     token_id: Optional[str]
@@ -47,7 +47,7 @@ class AssetResponse(AssetBase):
             categories=[cat.name.value for cat in asset.categories],  # Changed from categories to category
             file_url=asset.file_url,
             content_hash=asset.content_hash,  # Ensure this is correctly passed
-            owner_id=str(asset.owner_id.user_id),  # Convert UUID to string
+            owner_id=asset.owner_id, 
             is_minted=asset.is_minted,
             token_id=asset.token_id,
             created_at=asset.created_at,

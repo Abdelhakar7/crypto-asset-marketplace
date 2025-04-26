@@ -16,7 +16,7 @@ class Asset(Document):
     asset_type: int = Field(..., unique=True)
     file_url: str
     price: float
-    owner_id: Link[User]
+    owner_id: UUID = Field(...)
     categories: List[Link[Category]]  # Required category, no longer Optional
     content_hash: str
     metadata: Optional[Dict[str, Any]] = {}
