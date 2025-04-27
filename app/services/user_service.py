@@ -35,14 +35,7 @@ class UserService:
         user = await User.find_one(User.user_id == user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        
-        # Update user fields
-        user.username = data.username
-        user.hashed_password = get_password_hash(data.password)
-        
-        # Save changes
-        await user.save()
-        
-        # Refresh user from database to get updated values
-        return await User.find_one(User.user_id == user_id)
+        # walllah youknow nothing hiba snow 
+        await user.update({"$set": data.dict(exclude_unset=True)})
+        return user
         

@@ -4,7 +4,6 @@ from app.schemas.user_schema import UserCreate, UserOut, UserUpdate
 from app.services.user_service import UserService
 from app.api.api_v1.auth.jwt import get_current_active_user
 from app.models.user_model import User
-from uuid import UUID
 
 user_router = APIRouter()
 
