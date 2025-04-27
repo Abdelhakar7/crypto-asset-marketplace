@@ -84,7 +84,7 @@ async def get_asset(
         raise HTTPException(status_code=404, detail="Asset not found")
     return result
 
-
+# imagine HIBA hhhhh hiba 
 @asset_router.put("/{asset_id}", response_model=AssetResponse)
 async def update_asset(data: AssetUpdate ,asset_id: UUID = Path(..., description="The ID of the asset to update"),
     current_user: User = Depends(get_current_active_user),
@@ -100,4 +100,17 @@ async def update_asset(data: AssetUpdate ,asset_id: UUID = Path(..., description
         raise HTTPException(status_code=404, detail="Asset not found")
     return result
 
+## saha rani zedt delete asset 
+
+@asset_router.delete("/{asset_id}" ,summary= "Delete an asset")
+async def delete_asset(
+    asset_id: UUID = Path(..., description="The ID of the asset to delete"),
+    current_user: User = Depends(get_current_active_user),
+    asset_service: AssetService = Depends()
+):
+    """Delete an asset"""
+    result = await asset_service.delete_asset(asset_id=asset_id , user_id=current_user.user_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Asset not found")
+    return {"message": "Asset deleted successfully"}
     

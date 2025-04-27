@@ -113,7 +113,7 @@ class AssetService:
             )
         
 
-        
+
     async def update_asset(self ,asset_id :UUID, data: AssetUpdate ,user_id : UUID) -> AssetResponse:
         try:
             asset = await Asset.find_one((Asset.asset_id == asset_id) and (Asset.owner_id ==user_id) )
@@ -144,6 +144,28 @@ class AssetService:
             # Re-raise HTTP exceptions as is
             raise
 
+
+        ### bon hiya houda was good at fir5t but then everything collapsed mohim end point is working ou sayyi 
+
+    async def delete_asset(self, asset_id: UUID, user_id: UUID) -> bool:
+        try:
+            asset = await Asset.find_one((Asset.asset_id == asset_id) and (Asset.owner_id == user_id))
+            if not asset:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Asset not found"
+                )
+            
+            await asset.delete()
+            return True
+        except HTTPException:
+            # Re-raise HTTP exceptions as is
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Unexpected error deleting asset: {str(e)}"
+            )
 
 
 
