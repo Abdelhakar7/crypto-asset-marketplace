@@ -15,6 +15,9 @@ from app.models.asset_type import AssetType
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# i wish if everything endes
+
+
 PREDEFINED_ASSET_TYPES = [
     {"asset_type_id": 1, "name": "image"},
     {"asset_type_id": 2, "name": "video"},
