@@ -1,0 +1,147 @@
+/* Ensure consistent sizing */
+*, *::before, *::after {
+    box-sizing: border-box;
+  }
+  
+  /* Overlay dims the background */
+  .modal-overlay {
+    position: fixed;
+    inset: 0; /* shorthand for top/right/bottom/left: 0 */
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+    backdrop-filter: blur(4px);
+  }
+  
+  /* Modal box */
+  .modal-content {
+    background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+    padding: 2.5rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Modal heading */
+  .modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+  }
+  
+  /* Close (×) button */
+  .close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.2s;
+  }
+  
+  .close-button:hover {
+    color: white;
+  }
+  
+  /* Form inside modal */
+  .modal-content form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Labels */
+  .modal-content label {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Text, password, email inputs */
+  .modal-content input[type="text"],
+  .modal-content input[type="password"],
+  .modal-content input[type="email"] {
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    width: 100%;
+    color: white;
+  }
+  
+  /* Input focus state */
+  .modal-content input:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.3);
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Placeholder styling */
+  .modal-content input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+    opacity: 1;
+  }
+  
+  /* Error message */
+  .error-message {
+    background-color: rgba(220, 38, 38, 0.2);
+    color: #fca5a5;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 1.25rem;
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    font-size: 0.875rem;
+    text-align: center;
+  }
+  
+  /* Submit button */
+  .modal-content button[type="submit"] {
+    padding: 0.85rem 1rem;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(90deg, #0ea5e9 0%, #06b6d4 100%);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    margin-top: 0.5rem;
+  }
+  
+  /* Submit button hover */
+  .modal-content button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(14, 165, 233, 0.4);
+  }
+  
+  /* Disabled button state */
+  .modal-content button[type="submit"]:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* Responsive tweak */
+  @media (max-width: 480px) {
+    .modal-content {
+      padding: 2rem;
+    }
+  }
+  

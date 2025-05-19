@@ -92,14 +92,12 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_HOSTS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept"],
+    expose_headers=["Content-Type"],
+    max_age=600,  # 10 minutes
 )
 
 # API Routes
 app.include_router(router, prefix=settings.API_V1_STR)
 
-# Root endpoint
-@app.get("/")
-async def root():
-    return {"message": "Welcome to NFT Digital Marketplace API. See /docs for API documentation."}

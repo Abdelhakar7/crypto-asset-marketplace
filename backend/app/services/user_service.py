@@ -38,4 +38,7 @@ class UserService:
         # walllah youknow nothing hiba snow 
         await user.update({"$set": data.dict(exclude_unset=True)})
         return user
-        
+    
+    @staticmethod
+    async def get_all_users():
+        return await User.find_all().to_list()
