@@ -1,2 +1,33 @@
-/nftenv
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.sqlite3
+
+# Virtual Environment
+nftenv/
+
+# Environment Variables
 .env
+
+# Logs
+*.log
+logs/
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+
+# Build Files
+build/
+dist/
+*.egg-info/
+
+# Node.js (if applicable for frontend)
+node_modules/

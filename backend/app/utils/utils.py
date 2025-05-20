@@ -27,3 +27,5 @@ def normalized_text(content : bytes) -> str:
 
 
       return  extract_normalize_text(extract_text_from_pdf(content))  
+
+# ha meli ro7ti w raninchyan 
